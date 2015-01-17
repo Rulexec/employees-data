@@ -1,0 +1,49 @@
+<!doctype>
+<html ng-app='app' ng-strict-di>
+<head>
+  <meta charset='utf-8'>
+  <title>Employees data</title>
+
+  <script src='https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js'></script>
+  <script src='https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js'></script>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.2/d3.min.js'></script>
+
+  <script src='https://ajax.googleapis.com/ajax/libs/angularjs/1.3.5/angular.min.js'></script>
+
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.11/angular-ui-router.min.js'></script>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.4/moment.min.js'></script>
+  <script src='lib/vendors.js'></script>
+
+  <script src='asyncm/asyncm.js'></script>
+
+  <script src='app/main.js'></script>
+  <script src='app/config.js'></script>
+
+  <script src='app/common/controllers/dataLoadController.js'></script>
+
+  <script src='app/common/services/dataProcessing.js'></script>
+  <script src='app/common/services/dataService.js'></script>
+
+  <script src='app/common/directives/myChartDirective.js'></script>
+  <script src='app/common/directives/birthdayCircleDirective.js'></script>
+
+  <script src='app/index/controllers/indexController.js'></script>
+  <script src='app/index/controllers/summaryController.js'></script>
+  <script src='app/index/controllers/timeGraphsController.js'></script>
+  <script src='app/index/controllers/birthdayCircleController.js'></script>
+  <script src='app/index/controllers/titlesController.js'></script>
+
+  <script src='app/routes.js'></script>
+
+  <link rel='stylesheet' href='app/index/css/index.css'>
+
+  <link rel='stylesheet' href='https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css'>
+  <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css'>
+</head>
+
+<body>
+
+<div ui-view></div>
+
+</body>
+</html>

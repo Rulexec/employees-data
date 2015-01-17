@@ -1,0 +1,39 @@
+<div class='container-fluid' style='margin-top: 2em'>
+  <div class='row'>
+    <div class='col-md-8 col-md-offset-1'>
+      <div class='row' style='margin-bottom: 1em'>
+        <ul class='nav nav-pills'>
+          <li ui-sref-active='active'><a ui-sref='.summary' href='#'>Summary</a></li>
+          <li ui-sref-active='active'><a ui-sref='.time-graphs' href='#'>Time graphs</a></li>
+          <li ui-sref-active='active'><a ui-sref='.birthday-circle' href='#'>Birthday circle</a></li>
+          <li ui-sref-active='active'><a ui-sref='.titles' href='#'>Titles</a></li>
+          <li><a style='cursor:pointer' ng-click='reload()'><i class='glyphicon glyphicon-refresh'></i></a></li>
+        </ul>
+      </div>
+      <div class='row'>
+        <div ui-view class='col-md-12'></div>
+      </div>
+    </div>
+    <div class='col-md-2 index-data-filters'>
+      <div>
+        <p>Time</p>
+        <div ui-slider='{range: true}' min='0' max='1' step='0.001' use-decimals ng-model='filters.timeRange'></div>
+        <div class='clearfix' style='margin-bottom: -10px'>
+          <p class='pull-left' style='color:gray'>{{ time.calc(filters.timeRange[0]) | date : 'yyyy-MM-dd' }}</p>
+          <p class='pull-right' style='color:gray'>{{ time.calc(filters.timeRange[1]) | date : 'yyyy-MM-dd' }}</p>
+        </div>
+      </div>
+      <hr>
+      <p>Total employees: <span>{{ sizes.total }}</span></p>
+      <div ng-repeat='c in binaryFilters'>
+        <hr>
+        <div>
+          <p>{{ c.name[1] }}</p>
+          <p ng-repeat='b in c.variants'>
+            <input ng-model='filters[c.name[0]][b[0]]' type='checkbox'> {{ b[1] }} <span style='color:gray'>{{ sizes[c.name[0]][b[0]].current }}</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

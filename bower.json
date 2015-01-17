@@ -1,0 +1,8 @@
+{
+  "name": "employees",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "angular-ui-slider": "^0.0.2"
+  }
+}
