@@ -27,8 +27,9 @@ function() {
   };
 
   M.tick = function() {
+    var args = arguments;
     return M.sleep(0).then(function() {
-      return M.pure.apply(null, arguments);
+      return M.pure.apply(null, args);
     });
   };
 
