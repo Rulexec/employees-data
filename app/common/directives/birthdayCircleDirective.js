@@ -218,6 +218,7 @@ angular.module('app').directive('birthdayCircle', [function() {
                 ).append('text'
                   ).attr('x', 0).attr('y', 0
                   ).text(astrologicalSignsUnicode[i]
+                  ).attr('font-family', 'serif'
                   ).attr('text-anchor', 'middle'
                   ).attr('alignment-baseline', 'central'
                   ).attr('fill', 'white'
@@ -240,7 +241,7 @@ angular.module('app').directive('birthdayCircle', [function() {
                   ).attr('stroke', 'none').attr('fill', 'none');
 
                   g.append('text'
-                  ).attr('font-family', 'fantasy'
+                  ).attr('font-family', 'serif'
                   ).attr('font-size', (signTitleSize * 0.6)
                   ).attr('text-anchor', 'middle'
                   ).attr('fill', 'white'
