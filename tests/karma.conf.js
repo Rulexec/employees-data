@@ -25,6 +25,7 @@ module.exports = function(config) {
       '../lib/vendors.js',
 
       '../app/main.js',
+      '../app/util.js',
       '../app/common/services/**/*.js',
 
       'src/dummyData.js',

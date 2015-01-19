@@ -378,13 +378,12 @@ angular.module('app').directive('birthdayCircle', [function() {
           var employeesCount = 0, maxBirthdaysInSameDay = 0;
 
           rawData.filter(function(x) { return x.birthday !== null; }).forEach(function(x) {
-            var b = moment(x.birthday),
-                d = b.dayOfYear();
+            var d = dateToDayOfYear(x.birthday);
 
             context.map[x.id] = context.map[x.id] || {};
 
             // 60 is a 1 march of non-leap year, we are saying, that 60 is a 29 febrary, always
-            if (!b.isLeapYear() && d >= 60) d++;
+            if (!isLeapYear(x.birthday.getFullYear()) && d >= 60) d++;
 
             var person = {
               day: d,
@@ -411,6 +410,22 @@ angular.module('app').directive('birthdayCircle', [function() {
             birthdaysMap: birthdaysMap,
             groupedByDay: groupedByDay,
             peopleList: peopleList
+          };
+
+          function isLeapYear(year) {
+            if (year % 4 === 0) {
+              if (year % 400 === 0) return true;
+              if (year % 100 === 0) return false;
+              
+              return true;
+            }
+
+            return false;
+          }
+          function dateToDayOfYear(date) {
+            var monthes = [0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335]; 
+
+            return monthes[date.getMonth()] + date.getDate();
           };
         }
 
