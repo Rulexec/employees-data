@@ -13,7 +13,7 @@ function($scope, M, $state, dataService) {
     timeRange: [0, 1]
   };
 
-  $scope.binaryFilters = [
+  var binaryFilters = $scope.binaryFilters = [
     {name: ['gender', 'Gender'], variants: [['male', 'Male'], ['female', 'Female']]},
     {name: ['category', 'Category'], variants: [
       /*['developing', 'Developting'],
@@ -22,10 +22,13 @@ function($scope, M, $state, dataService) {
       ['other', 'Other']
     ]},
     {name: ['rank', 'Rank'], variants: [
+      ['student', 'Student'],
       ['junior', 'Junior'],
-      //['middle', 'Middle'],
+      ['middle', 'Middle'],
       ['senior', 'Senior'],
-      //['lead', 'Lead']
+      ['teamLeader', 'Team Leader'],
+      ['lead', 'Lead'],
+      ['projectManager', 'Project Manager'],
       ['other', 'Other']
     ]}
   ];
@@ -77,20 +80,15 @@ function($scope, M, $state, dataService) {
       })).bind(function(dataProcessing) {
         $scope.dataProcessing = dataProcessing;
 
-        return M.parallel([
-          dataProcessing.sets.all().bind(function(x) { return x.size(); }).seeBind(function(x) { $scope.sizes.total = x; }),
-
-          dataProcessing.sets.gender.male().bind(function(x) { return x.size(); }).seeBind(function(x) { $scope.sizes.gender.male.current = x; }),
-          dataProcessing.sets.gender.female().bind(function(x) { return x.size(); }).seeBind(function(x) { $scope.sizes.gender.female.current = x; }),
-
-          dataProcessing.sets.category.other().bind(function(x) { return x.size(); }).seeBind(function(x) { $scope.sizes.category.other.current = x; }),
-
-          dataProcessing.sets.rank.junior().bind(function(x) { return x.size(); }).seeBind(function(x) { $scope.sizes.rank.junior.current = x; }),
-          dataProcessing.sets.rank.senior().bind(function(x) { return x.size(); }).seeBind(function(x) { $scope.sizes.rank.senior.current = x; }),
-          dataProcessing.sets.rank.other().bind(function(x) { return x.size(); }).seeBind(function(x) { $scope.sizes.rank.other.current = x; })
-
-          // TODO: write function, that generates this from binaryFilters
-        ]);
+        return M.parallel([dataProcessing.sets.all().bind(function(x) { return x.size(); }).seeBind(function(x) { $scope.sizes.total = x; })].concat(
+          binaryFilters.map(function(category) {
+            return category.variants.map(function(variant) {
+              return dataProcessing.sets[category.name[0]][variant[0]]().bind(function(x) { return x.size(); }).seeBind(function(x) {
+                $scope.sizes[category.name[0]][variant[0]].current = x;
+              });
+            });
+          }).reduce(function f(acc, el) { return acc.concat(Array.isArray(el) ? el.reduce(f, []) : el); }, [])
+        ));
       }).run(function(error) {
         if (error) {
           console.log(error, new Error().stack);

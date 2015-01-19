@@ -1,1 +1,7 @@
-<p ng-repeat='title in allTitles'>{{ title }}</p>
+<div style='margin-bottom: 1em'>
+  <input ng-model='currentOnly' id='titlesCurrentCheckbox' type='checkbox'>
+  <label for='titlesCurrentCheckbox'>Current only</label>
+</div>
+<div>
+  <p ng-repeat='title in allTitles'>{{ title }}</p>
+</div>

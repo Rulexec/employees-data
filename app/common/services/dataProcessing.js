@@ -1,6 +1,6 @@
 angular.module('app').service('DataProcessing',
-['M',
-function(M) {
+['M', 'util',
+function(M, util) {
   DataProcessing.NOT_FOUND = 'not_found';
 
   function DataProcessing(options) {
@@ -32,24 +32,36 @@ function(M) {
       ); })
     };
 
-    this.titles = {
-      all: lazy(function() { return M.lazy(function() {
-        var titlesSet = {};
+    var titlesM = M.lazyF(function() {
+      var allTitlesSet = {},
+          currentTitlesSet = {};
 
-        data.employees.forEach(function(employee) {
-          employee.titleHistory.forEach(function(title) {
-            titlesSet[title.title] = true;
-          });
+      data.employees.forEach(function(employee) {
+        employee.titleHistory.forEach(function(title) {
+          allTitlesSet[title.title] = true;
         });
+        currentTitlesSet[employee.titleHistory[0].title] = true;
+      });
 
-        var titlesList = [];
+      var allTitlesList = [],
+          currentTitlesList = [];
 
-        for (var name in titlesSet) if (titlesSet.hasOwnProperty(name)) {
-          titlesList.push(name);
-        }
+      for (var name in allTitlesSet) if (allTitlesSet.hasOwnProperty(name)) {
+        allTitlesList.push(name);
+      }
+      for (var name in currentTitlesSet) if (currentTitlesSet.hasOwnProperty(name)) {
+        currentTitlesList.push(name);
+      }
 
-        return M.pure(null, titlesList);
-      }).bind(function(x) { return M.pure(null, x.slice()); }); })
+      return M.pure(null, {
+        all: allTitlesList,
+        current: currentTitlesList
+      });
+    });
+
+    this.titles = {
+      all: lazy(function() { return M.lazyM(titlesM.bind(function(x) { return M.pure(null, x.all); })); }),
+      current: lazy(function() { return M.lazyM(titlesM.bind(function(x) { return M.pure(null, x.current); })); })
     };
 
     this.sets = {
@@ -76,16 +88,13 @@ function(M) {
         }); })
       },
       rank: {
-        junior: lazy(function() { return M.lazyF(function() {
-          return allSet.filter(function(x) {
-            return (/.*junior.*/i).test(x.titleHistory[0].title);
-          });
-        }); }),
-        senior: lazy(function() { return M.lazyF(function() {
-          return allSet.filter(function(x) {
-            return (/.*senior.*/i).test(x.titleHistory[0].title);
-          });
-        }); }),
+        student: rankByRegexp(/.*student.*/i),
+        junior: rankByRegexp(/.*junior.*/i),
+        middle: rankByList(['IT Engineer', 'Software Engineer', 'Software Test Automation Engineer', 'Software Testing Engineer']),
+        senior: rankByRegexp(/.*senior.*/i),
+        lead: rankByRegexp(/.*lead\b.*/i),
+        teamLeader: rankByRegexp(/.*team leader.*/i),
+        projectManager: rankByRegexp(/.*project manager.*/i),
         other: lazy(function() { return M.lazyF(function() {
           var m = M.pure(null, allSet);
 
@@ -103,6 +112,23 @@ function(M) {
         }); }),
       }
     };
+    function rankByRegexp(regex) {
+      return lazy(function() { return M.lazyF(function() {
+        return allSet.filter(function(x) {
+          return (regex).test(x.titleHistory[0].title);
+        });
+      }); });
+    }
+    function rankByList(ranks) {
+      return lazy(function() { return M.lazyF(function() {
+        var set = {};
+        ranks.forEach(function(x) { set[x] = true; });
+
+        return allSet.filter(function(x) {
+          return x.titleHistory[0].title in set;
+        });
+      }); });
+    }
 
     this.setSizeTimeFunction = function(set) {
       return M.pureF(function() {
@@ -166,18 +192,16 @@ function(M) {
           }
         }
         if (filters.rank) {
-          if (filters.rank.junior === false) {
-            addM(self.sets.rank.junior().seeBind(function(x) { ranks.junior = x; }));
-            addFilterM(function(x) { return ranks.junior.contains(x).fmap(function(b) { return !b; }); });
-          }
-          if (filters.rank.senior === false) {
-            addM(self.sets.rank.senior().seeBind(function(x) { ranks.senior = x; }));
-            addFilterM(function(x) { return ranks.senior.contains(x).fmap(function(b) { return !b; }); });
-          }
-          if (filters.rank.other === false) {
-            addM(self.sets.rank.other().seeBind(function(x) { ranks.other = x; }));
-            addFilterM(function(x) { return ranks.other.contains(x).fmap(function(b) { return !b; }); });
-          }
+          //util.objectFields(filters.rank).map(function);
+          util.objectForEach(filters.rank, function(rank, t) {
+            if (t) return;
+            
+            var rankM = self.sets.rank[rank];
+            if (typeof rankM !== 'function') return;
+
+            addM(rankM().seeBind(function(x) { ranks[rank] = x; }));
+            addFilterM(function(x) { return ranks[rank].contains(x).fmap(function(b) { return !b; }); });
+          });
         }
         
         return m.bind(function() {
