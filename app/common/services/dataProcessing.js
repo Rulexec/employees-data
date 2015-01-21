@@ -159,6 +159,92 @@ function(M, util) {
         };
       });
     };
+    this.setsSizeDiffTime = function(sets) {
+      return M.parallel(sets.map(function(x) {
+        return self.setSizeTimeFunction(x).bind(function(x) {
+          return x.discrete().bind(function(x) { return x.all(); });
+        });
+      })).bind(function(discretes) {
+        discretes = discretes.map(function(x) { return x[0]; });
+        return M.pure(null, {
+          all: function() { return M.lazy(function() {
+            var allDates = [];
+            discretes.forEach(function(discrete, i) { discrete.forEach(function(x) {
+              allDates.push({date: x[0], set: i, value: x[1]});
+            }); });
+
+            allDates.sort(function(a, b) { return a.date - b.date; });
+
+            function createNewLastDiff(x, value) {
+              if (value === undefined) value = x.value;
+
+              var lastDiffSet = {},
+                  lastDiff = {date: x.date, diffs: [{set: x.set, valueDiff: value}]};
+              lastDiffSet[x.set] = 0;
+
+              return {
+                lastDiffSet: lastDiffSet,
+                lastDiff: lastDiff
+              };
+            }
+
+            var diffs = util.foldlFM(allDates, function(acc, x) {
+              var currentValues = acc.currentValues,
+                  lastDiff = acc.lastDiff,
+                  lastDiffSet = acc.lastDiffSet,
+                  diffs = acc.diffs;
+
+              var oldValue = currentValues[x.set],
+                  diff;
+              if (oldValue === undefined) {
+                oldValue = 0;
+                diff = x.value;
+              } else {
+                diff = x.value - oldValue;
+              }
+              currentValues[x.set] = x.value;
+
+              if (x.date === lastDiff.date) {
+                if (lastDiffSet[x.set] !== undefined) {
+                  lastDiff.diffs[lastDiffSet[x.set]] += diff;
+                } else {
+                  lastDiffSet[x.set] = lastDiff.diffs.push(diff) - 1;
+                }
+              } else {
+                var newLastDiff = createNewLastDiff(x, diff);
+
+                acc.lastDiff = newLastDiff.lastDiff;
+                acc.lastDiffSet = newLastDiff.lastDiffSet;
+                diffs.push(newLastDiff.lastDiff);
+              }
+            }, function(x) {
+              if (!x) return [];
+
+              var currentValues = {};
+              currentValues[x.set] = x.value;
+
+              var lastDiff = createNewLastDiff(x);
+
+              return {
+                currentValues: currentValues,
+                lastDiffSet: lastDiff.lastDiffSet,
+                lastDiff: lastDiff.lastDiff,
+                diffs: [lastDiff.lastDiff]
+              };
+            }).diffs;
+
+            return M.pure(null, diffs);
+          }); }
+        });
+      });
+    };
+    /*this.setsSizeDiffTime = function(sets) { return M.pureF(function() { return {
+      discrete: function() { return M.pureF(function() { return {
+        all: function() { return M.lazy(function() {
+          //
+        }); }
+      }; }); }
+    }; }); };*/
 
     this.filter = function(filters) {
       return M.pureM(function() {

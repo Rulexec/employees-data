@@ -149,7 +149,9 @@ function() {
 
     return M(function(callback) {
       options = options || {};
-      var errorCatcher = options.errorCatcher;
+      var errorCatcher = options.errorCatcher,
+          drop = options.drop,
+          single = options.single;
 
       if (typeof errorCatcher !== 'function') errorCatcher = function(){};
 
@@ -161,8 +163,10 @@ function() {
       
       var left = ps.length;
 
-      var results = [];
-      for (var i = 0; i < left; i++) results.push(null);
+      if (!drop) {
+        var results = [];
+        for (var i = 0; i < left; i++) results.push(null);
+      }
 
       ps.forEach(function(m, i) {
         m.run(function(error) {
@@ -171,11 +175,16 @@ function() {
             return;
           }
 
-          results[i] = Array.prototype.slice.call(arguments, 1);
+          if (!drop) {
+            results[i] = Array.prototype.slice.call(arguments, 1);
+            if (single) results[i] = results[i][0];
+          }
+
           left--;
 
           if (left === 0) {
-            callback(null, results);
+            if (drop) callback(null);
+            else callback(null, results);
           }
         });
       });

@@ -1,7 +1,14 @@
 angular.module('app').config(
-['$locationProvider', '$stateProvider', '$urlRouterProvider',
-function($locationProvider, $stateProvider, $urlRouterProvider) {
+['$locationProvider', '$stateProvider', '$urlRouterProvider', 'NO_CACHE',
+function($locationProvider, $stateProvider, $urlRouterProvider, NO_CACHE) {
   $urlRouterProvider.when("", "/");
+
+  if (NO_CACHE) {
+    $stateProvider.decorator('views', function (state, parent) {
+      state.templateUrl += '?' + Math.random();
+      return parent(state);
+    });
+  }
 
   $stateProvider.state('dataLoad', {
     params: {'ret': null },
@@ -27,6 +34,10 @@ function($locationProvider, $stateProvider, $urlRouterProvider) {
     url: 'titles',
     controller: 'TitlesController',
     templateUrl: 'app/index/templates/titles.html'
+  }).state('index.sizes-of-categories', {
+    url: 'sizes-of-categories',
+    controller: 'SetSizesController',
+    templateUrl: 'app/index/templates/setSizes.html'
   });
 
   $stateProvider.state('404', {
